@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import filedialog
 import random
 import pyautogui
+import webbrowser
 from PIL import ImageGrab
 
 
@@ -55,6 +56,14 @@ class GroupsDisplayFrame(ttk.Frame):
                 membNum += 1
             groupNum += 1
 
+# class WheelDecideButton(tk.Button):
+#     def __init__(self, parent, *args, **kwargs):
+#         tk.Button.__init__(self, parent, *args, **kwargs)
+#         self.parent = parent
+#         self.buttonLabel = 'Open Wheel Decide'
+#         self.wheelLink = ''
+#     def generateLink(self):
+
 
 class DialogFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -91,9 +100,9 @@ class FileChoiceFrame(tk.Frame):
     def setLeadAndParFromLines(self, fileLines):
         # fileLines = groupFile.readlines()
         if "[LEADERS]\n" not in fileLines:
-            print("[LEADERS] block definition in file is missing, please add it. See readme.md for details.")
+            self.parent.setDialog("[LEADERS] block definition in file is missing, please add it. See readme.md for details.")
         elif "[PARTICIPANTS]\n" not in fileLines:
-            print("[PARTICIPANTS] block definition in file is missing, please add it. See readme.md for details.")
+            self.parent.setDialog("[PARTICIPANTS] block definition in file is missing, please add it. See readme.md for details.")
         else:
             # remove empty lines - https://stackoverflow.com/questions/1157106/remove-all-occurrences-of-a-value-from-a-list
             # to do: understand how this works
@@ -157,6 +166,7 @@ class FileChoiceFrame(tk.Frame):
             self.choiceLabelText.set(inputFile.name)
             if isLeadParFile(inputFileLines):
                 self.parent.setDialog("Leader/Participant file detected. Please choose the number of groups to create.")
+                self.parent.groupsDisplayFrame.cleanGroupDisplay()
                 self.parent.groupGenFrame.enableButton()
                 # set leaders and groups globally, make createGroups frame/button available
                 self.setLeadAndParFromLines(inputFileLines)
@@ -250,6 +260,8 @@ class MainApplication(tk.Frame):
         self.groupsDisplayFrame.pack()
         self.assignGroupsButton = tk.Button(self, text="Assign Groups", state="disabled", command=self.assignGroups)
         self.assignGroupsButton.pack()
+        self.wheelDecideButton = tk.Button(self, text="Open wheel decide", state="active", command=self.openWheelDecide)
+        self.wheelDecideButton.pack()
         # self.fileChoiceFrame.setGroupGenFrame(self.groupGenFrame)
 
     def updateGroupsDisplay(self):
@@ -273,9 +285,11 @@ class MainApplication(tk.Frame):
 
     def enableAssignment(self):
         self.assignGroupsButton.configure(state="normal")
+        self.wheelDecideButton.configure(state="normal")
 
     def disableAssignment(self):
         self.assignGroupsButton.configure(state="disabled")
+        self.wheelDecideButton.configure(state="disabled")
 
     def assignGroups(self):
         def locateWindow():
@@ -425,6 +439,25 @@ class MainApplication(tk.Frame):
         #self.disableAssignment()
         #print(f"Not assigned: {unassignedParticipants}")
         self.setDialog("Assignment complete. Please assign any remaining members manually.")
+
+    def openWheelDecide(self):
+        count = 1
+        baseUrl = "https://wheeldecide.com/index.php?c1="
+        urlSuffix = "&t=Wheel+Decide%21&time=5&remove=1"
+        fullUrl = baseUrl
+        for group in self.groups:
+            if count > 1:
+                fullUrl += f"&c{count}="
+            for member in group:
+                fullUrl += f"{member}, "
+            fullUrl = fullUrl[:-2] #chop off the extra ", "
+            count += 1
+        fullUrl = fullUrl.replace(",", "%2C")
+        fullUrl = fullUrl.replace(" ", "+")
+        fullUrl += urlSuffix
+        webbrowser.open(fullUrl)
+
+
 
 
 root = tk.Tk()
