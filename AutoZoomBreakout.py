@@ -459,8 +459,9 @@ class MainApplication(tk.Frame):
 
 
 
-
-root = tk.Tk()
-root.title("ZoomAutoBreakout")
-MainApplication(root).pack(side="top", fill="both", expand=True)
-root.mainloop()
+try:
+    root = tk.Tk()
+    root.title("ZoomAutoBreakout")
+    MainApplication(root).pack(side="top", fill="both", expand=True)
+    root.mainloop()
+except Exception as e: print(e)
