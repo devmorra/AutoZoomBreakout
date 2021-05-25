@@ -464,4 +464,7 @@ try:
     root.title("ZoomAutoBreakout")
     MainApplication(root).pack(side="top", fill="both", expand=True)
     root.mainloop()
-except Exception as e: print(e)
+except Exception as e:
+    print(e)
+    input("Press enter to exit")
+    
